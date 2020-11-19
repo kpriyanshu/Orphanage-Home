@@ -1,0 +1,254 @@
+from tkinter import *
+from tkinter import ttk #for combobox in Additional_details
+import pymysql 
+from tkinter import messagebox
+
+class Orphanage:
+    def __init__(self,root):
+        self.root=root
+        self.root.title("Orphanage Management System")
+        self.root.geometry("1350x700+0+0")
+
+        title=Label(self.root,text="Orphanage Child Management System",bd=10,relief=GROOVE,font=("times new roman",40,"bold"),bg="indigo",fg="red")
+        title.pack(side=TOP,fill=X)
+
+
+
+        ####======All variables======####
+        self.enty_no=StringVar()
+        self.name_var=StringVar()
+        self.address=StringVar()
+        self.gender_var=StringVar()
+        self.contact_var=StringVar()
+        self.dob_var=StringVar()
+
+        self.search_by=StringVar()
+        self.search_txt=StringVar()
+
+
+        ############ manage frame ############
+        Manage_frame=Frame(self.root,bd=4,relief=RIDGE,bg="navy")
+        Manage_frame.place(x=20,y=100,width=450,height=580)
+
+        m_title=Label(Manage_frame,text="Child Details",bg="navy",fg="white",font=("times new roman",30,"bold"))
+        m_title.grid(row=0,columnspan=2,pady=20)
+
+        entry_no=Label(Manage_frame,text="Entry No",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        entry_no.grid(row=1,column=0,pady=10,padx=20,sticky="w")
+
+        txt_entry=Entry(Manage_frame,textvariable=self.enty_no,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_entry.grid(row=1,column=1,pady=10,padx=20,sticky="w")
+
+        lbl_name=Label(Manage_frame,text="Name",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        lbl_name.grid(row=2,column=0,pady=10,padx=20,sticky="w")
+
+        txt_name=Entry(Manage_frame,textvariable=self.name_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_name.grid(row=2,column=1,pady=10,padx=20,sticky="w")
+
+        lbl_address=Label(Manage_frame,text="Address",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        lbl_address.grid(row=3,column=0,pady=10,padx=20,sticky="w")
+
+        txt_address=Entry(Manage_frame,textvariable=self.address,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_address.grid(row=3,column=1,pady=10,padx=20,sticky="w")
+
+        lbl_Gender=Label(Manage_frame,text="Gender",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        lbl_Gender.grid(row=4,column=0,pady=10,padx=20,sticky="w")
+
+        combo_gender=ttk.Combobox(Manage_frame,textvariable=self.gender_var,font=("times new roman",13,"bold"),state='readonly')
+        combo_gender['values']=("male","female","other")
+        combo_gender.grid(row=4,column=1,pady=20,padx=10)
+
+        
+        lbl_contact=Label(Manage_frame,text="Contact",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        lbl_contact.grid(row=5,column=0,pady=10,padx=20,sticky="w")
+
+        txt_contact=Entry(Manage_frame,textvariable=self.contact_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_contact.grid(row=5,column=1,pady=10,padx=20,sticky="w")
+
+        lbl_dob=Label(Manage_frame,text="D.O.B",bg="navy",fg="white",font=("times new roman",20,"bold"))
+        lbl_dob.grid(row=6,column=0,pady=10,padx=20,sticky="w")
+
+        txt_dob=Entry(Manage_frame,textvariable=self.dob_var,font=("times new roman",15,"bold"),bd=5,relief=GROOVE)
+        txt_dob.grid(row=6,column=1,pady=10,padx=20,sticky="w")
+
+        lbl_addr=Label(Manage_frame,text="Additional details",bg="navy",fg="white",font=("times new roman",10,"bold"))
+        lbl_addr.grid(row=7,column=0,pady=10,padx=20,sticky="w")
+
+        self.addtional_details=Text(Manage_frame,width=30,height=3,font=("",10))
+        self.addtional_details.grid(row=7,column=1,pady=10,padx=20,sticky="w")
+
+        ## Button Frame ##
+
+        Bttn_frame=Frame(Manage_frame,bd=4,relief=RIDGE,bg="plum")
+        Bttn_frame.place(x=10,y=510,width=430)
+
+
+        Addbtn=Button(Bttn_frame,text="Add",width=10,command=self.add_child).grid(row=0,column=0,padx=10,pady=10)
+        updatebtn=Button(Bttn_frame,text="Update",width=10,command=self.update_data).grid(row=0,column=1,padx=10,pady=10)
+        deletebtn=Button(Bttn_frame,text="Delete",width=10,command=self.delete_data).grid(row=0,column=2,padx=10,pady=10)
+        clearbtn=Button(Bttn_frame,text="Clear",width=10,command=self.clear).grid(row=0,column=3,padx=10,pady=10)
+        
+
+
+
+
+
+        ############ detail frame ############
+        detail_frame=Frame(self.root,bd=4,relief=RIDGE,bg="dark green")
+        detail_frame.place(x=500,y=100,width=800,height=580)
+
+        lbl_search=Label(detail_frame,text="Search By",bg="dark green",fg="white",font=("times new roman",20,"bold"))
+        lbl_search.grid(row=0,column=0,pady=10,padx=20,sticky="w")
+
+        combo_search=ttk.Combobox(detail_frame,textvariable=self.search_by,width=10,font=("times new roman",13,"bold"),state='readonly')
+        combo_search['values']=("ENTRY NO","NAME","CONTACT")
+        combo_search.grid(row=0,column=1,pady=20,padx=10)
+
+        txt_search=Entry(detail_frame,textvariable=self.search_txt,font=("times new roman",13,"bold"),width=15,bd=5,relief=GROOVE)
+        txt_search.grid(row=0,column=2,pady=10,padx=20,sticky="w")
+
+        searchbtn=Button(detail_frame,text="Search",width=10,pady=5,command=self.search_data).grid(row=0,column=3,padx=10,pady=10)
+        showbtn=Button(detail_frame,text="Show",width=10,pady=5,command=self.fetch_data).grid(row=0,column=4,padx=10,pady=10)
+        
+        ## table frame ##
+
+        table_frame=Frame(detail_frame,bd=4,relief=RIDGE,bg="dark green")
+        table_frame.place(x=10,y=70,width=760,height=500)
+
+
+        scroll_x=Scrollbar(table_frame,orient=HORIZONTAL)
+        scroll_y=Scrollbar(table_frame,orient=VERTICAL)
+
+        self.Orphanage_table=ttk.Treeview(table_frame,columns=("entry","name","address","gender","contact","dob","Additional_details"),xscrollcommand=scroll_x.set,yscrollcommand=scroll_y.set)
+        scroll_x.pack(side=BOTTOM,fill=X)
+        scroll_y.pack(side=RIGHT,fill=Y)
+        scroll_x.config(command=self.Orphanage_table.xview)
+        scroll_y.config(command=self.Orphanage_table.yview)
+        self.Orphanage_table.heading("entry",text="Entry no")
+        self.Orphanage_table.heading("name",text="Name")
+        self.Orphanage_table.heading("address",text="Address")
+        self.Orphanage_table.heading("gender",text="Gender")
+        self.Orphanage_table.heading("contact",text="Contact")
+        self.Orphanage_table.heading("dob",text="D.O.B")
+        self.Orphanage_table.heading("Additional_details",text="Additional_details")
+        self.Orphanage_table['show']='headings'  #this will not show extra column which is default 
+        
+        self.Orphanage_table.column("entry",width=50)   #setting our sizes not using default sizes
+        self.Orphanage_table.column("name",width=100)
+        self.Orphanage_table.column("address",width=200)
+        self.Orphanage_table.column("gender",width=100)
+        self.Orphanage_table.column("contact",width=100)
+        self.Orphanage_table.column("dob",width=50)
+        self.Orphanage_table.column("Additional_details",width=300)
+        self.Orphanage_table.pack(fill=BOTH,expand=1)  # for showing in a page
+        self.Orphanage_table.bind("<ButtonRelease-1>",self.get_cursor)
+        self.fetch_data()
+
+    def add_child(self):
+        
+        if self.enty_no.get()=="" or self.name_var.get()=="":
+            messagebox.showerror("Error","All fields are require!!")
+        
+        elif self.dob_var.get()=="" or self.contact_var.get()=="":
+            messagebox.showerror("Error","All fields are require!!")
+        
+        
+        else:
+            con=pymysql.connect(host="localhost",user="root",password="password",database="oms")
+            cur=con.cursor()
+            cur.execute("insert into Orphanage values(%s,%s,%s,%s,%s,%s,%s)",(self.enty_no.get(),
+                                                                        self.name_var.get(),
+                                                                        self.address.get(),
+                                                                        self.gender_var.get(),
+                                                                        self.contact_var.get(),
+                                                                        self.dob_var.get(),
+                                                                        self.addtional_details.get('1.0',END)
+                                                                        ))
+
+            con.commit()
+            self.fetch_data()
+            self.clear()
+            con.close()
+            messagebox.showinfo("Success","Record has been inserted")
+
+    def fetch_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="password",database="oms")
+        cur=con.cursor()
+        cur.execute("select * from Orphanage")
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.Orphanage_table.delete(*self.Orphanage_table.get_children())
+            for row in rows:
+                self.Orphanage_table.insert('',END,values=row)
+            con.commit()
+        con.close()
+
+    def clear(self):
+        self.enty_no.set("")
+        self.name_var.set("")
+        self.address.set("")
+        self.gender_var.set("")
+        self.contact_var.set("")
+        self.dob_var.set("")
+        self.addtional_details.delete("1.0",END)
+
+    def get_cursor(self,ev):
+        cursor_row=self.Orphanage_table.focus()
+        contents=self.Orphanage_table.item(cursor_row)
+        row=contents['values']
+        self.enty_no.set(row[0])
+        self.name_var.set(row[1])
+        self.address.set(row[2])
+        self.gender_var.set(row[3])
+        self.contact_var.set(row[4])
+        self.dob_var.set(row[5])
+        self.addtional_details.delete("1.0",END)
+        self.addtional_details.insert(END,row[6])
+
+
+    def update_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="password",database="oms")
+        cur=con.cursor()
+        cur.execute("update Orphanage set name_var=%s,address=%s,gender_var=%s,contact_var=%s,dob_var=%s,addtional_details=%s where entry_no=%s",(
+                                                                        self.name_var.get(),
+                                                                        self.address.get(),
+                                                                        self.gender_var.get(),
+                                                                        self.contact_var.get(),
+                                                                        self.dob_var.get(),
+                                                                        self.addtional_details.get('1.0',END),
+                                                                        self.enty_no.get()
+                                                                        ))
+
+        con.commit()
+        self.fetch_data()
+        self.clear()
+        con.close()
+
+    def delete_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="password",database="oms")
+        cur=con.cursor()
+        cur.execute("delete from Orphanage where entry_no=%s",self.enty_no.get())
+        con.commit()
+        con.close()
+        self.fetch_data()
+        self.clear()
+
+    def search_data(self):
+        con=pymysql.connect(host="localhost",user="root",password="password",database="oms")
+        cur=con.cursor()
+
+        cur.execute("select * from Orphanage where "+str(self.search_by.get())+" LIKE '%"+str(self.search_txt.get())+"%'")
+        rows=cur.fetchall()
+        if len(rows)!=0:
+            self.Orphanage_table.delete(*self.Orphanage_table.get_children())
+            for row in rows:
+                self.Orphanage_table.insert('',END,values=row)
+            con.commit()
+        con.close()
+
+
+
+
+root=Tk()
+ob=Orphanage(root)
+root.mainloop()
